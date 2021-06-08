@@ -1,12 +1,12 @@
-INSERT INTO SENSITIVE_DATA (cpf, name, address_cep)
+INSERT INTO PERSONAL_DATA (cpf, name, surname, age, creditcard_id, phone)
 	VALUES 
-	(12356729000, 'Pessanha', 22221011),
-	(14335279722, 'Ariadne', 22221011),
-	(14335271111, 'Theo', 22221011),
-	(14335279791, 'Matheus', 20261220);
-INSERT INTO SCORE_DATA (age, patrimony, address_cep, occupation)
+	(11111111111, 'Igor', 'Genius', 30, 1111, 11111111),
+	(22222222222, 'Barbudon', 'Beauty', 2222, 30, 22222222),
+	(33333333333, 'Fuego', 'Hot', 3000, 3333, 33333333),
+	(44444444444, 'Aqua', 'Wet', 3000, 4444, 44444444);
+INSERT INTO ADDRESS_DATA (postal_code, street, district, city_id, country, last_update)
 	VALUES
-	(30, 'guitars', 22221011, 'dev'),
-	(30, 'flamengo', 22221011, 'tricotin'),
-	(3, 'planets', 22221011, 'astronaut'),
-	(29, 'fine clothes', 22221011, 'woodworker');
+	(11111111, 'dreams', 'EU', 'RJ','BR', '08062021' ),
+	(22222222, 'light', 'UJ', 'SP', 'USA',  '08062021'),
+	(33333333, 'planets', 'TR', 'CE', 'FR',  '08062021'),
+	(44444444, 'fine', 'FG', 'BH', 'ES', '08062021');

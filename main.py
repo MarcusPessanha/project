@@ -4,8 +4,6 @@ from sqlalchemy.orm import Session
 from app_credit import schemas, models, database, hashing
 
 
-
-
 app = FastAPI()
 
 models.Base.metadata.create_all(database.engine)
@@ -26,45 +24,52 @@ def get_db():
 
 
 @app.get("/person", tags = ["Person"])
-def get_all_data(db: Session=Depends(get_db)):
-    data_A = db.query(models.Base_A).all()
-    data_B = db.query(models.Base_B).all()
-    return data_A, data_B
+def get_all_data(response: Response, db: Session=Depends(get_db)):
+    Personal_Data = db.query(models.Personal_Data).all()
+    # Address_Data = db.query(models.Address_Data).all()
+    if not Personal_Data:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"msg": f"The database is empty - status: {response.status_code}"}
+    return Personal_Data#, Address_Data
 
 
-@app.get("/person/{id}", status_code = status.HTTP_200_OK, tags = ["Person"])
+@app.get("/person/{id}", response_model = schemas.Person_View, status_code = status.HTTP_200_OK, tags = ["Person"])
 def get_person_data(id, response: Response, db: Session=Depends(get_db)):
-    data_A = db.query(models.Base_A).filter(models.Base_A.id == id).first()
-    data_B = db.query(models.Base_B).filter(models.Base_B.id == id).first()
-    if not data_A:
+    Personal_Data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).first()
+    # Address_Data = db.query(models.Address_Data).filter(models.Address_Data.id == id).first()
+    if not Personal_Data:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"msg": f"The person with the id {id} not exists in the database - status: {response.status_code}"}
     
-    return data_A, data_B 
+    return Personal_Data#, Address_Data 
 
 
 @app.post("/person", status_code = status.HTTP_200_OK, tags = ["Person"])
 def create_person_data(request: schemas.Person, db: Session=Depends(get_db)):
-    sensitive_data = models.Base_A(
-        cpf=request.cpf,
-        name=request.name,
-        address_cep = request.address_cep,
-        debt_list = request.debt_list,
-        person_id = 1
-    )
-    score_data = models.Base_B(
+    personal_data = models.Personal_Data(
+        cpf = request.cpf,
+        name = request.name,
+        surname = request.name,
         age = request.age,
-        patrimony = request.patrimony,
-        address_cep = request.address_cep,
-        occupation = request.occupation
+        creditcard_id = request.creditcard_id,
+        phone = request.phone,
+        person_id = 1                            #atrelar ao cpf
+    )
+    address_data = models.Address_Data(
+        postal_code = request.postal_code,
+        street = request.street,
+        district = request.district,
+        city_id = request.city_id,
+        country = request.country,
+        last_update = request.last_update
     )
     try:
-        db.add(sensitive_data)
+        db.add(personal_data)
         db.commit()
-        db.refresh(sensitive_data)
-        db.add(score_data)
+        db.refresh(personal_data)
+        db.add(address_data)
         db.commit()
-        db.refresh(score_data)
+        db.refresh(address_data)
         return {"msg": f"The person of cpf {request.cpf} was registered in the database - status: {status.HTTP_201_CREATED}"}
     except Exception as e:
         return {"msg": f"Something goes wrong - Exception: {e}"}
@@ -72,10 +77,10 @@ def create_person_data(request: schemas.Person, db: Session=Depends(get_db)):
     
 @app.delete("/person/{id}", tags = ["Person"])
 def destroy_person_data(id, response: Response, db: Session=Depends(get_db)):
-    sensitive_data = db.query(models.Base_A).filter(models.Base_A.id == id).delete(synchronize_session=False)
-    score_data = db.query(models.Base_B).filter(models.Base_B.id == id).delete(synchronize_session=False)
+    personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).delete(synchronize_session=False)
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id).delete(synchronize_session=False)
 
-    if not sensitive_data:
+    if not personal_data:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"msg": f"id {id} does not exist in database - status: - status: {response.status_code}"}
 
@@ -88,32 +93,45 @@ def destroy_person_data(id, response: Response, db: Session=Depends(get_db)):
 
 @app.put("/person/{id}", status_code=status.HTTP_202_ACCEPTED, tags = ["Person"])
 def update_person_data(id, response: Response, request: schemas.Person, db: Session=Depends(get_db)):
-    sensitive_data = db.query(models.Base_A).filter(models.Base_A.id == id)
-    score_data = db.query(models.Base_B).filter(models.Base_B.id == id)
+    personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id)
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id)
     
-    if not sensitive_data.first():
+    if not personal_data.first():
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"msg": f"id {id} does not exist in database - status: - status: {response.status_code}"}
     else:
-        sensitive_data.update({
+        personal_data.update({
         "cpf": request.cpf,
         "name": request.name,
-        "address_cep": request.address_cep,
-        "debt_list": request.debt_list
+        "surname":request.surname,
+        "age": request.age,
+        "creditcard_id": request.creditcard_id,
+        "phone": request.phone
         },synchronize_session=False
     )
-        score_data.update({
-        "age": request.age,
-        "patrimony": request.patrimony,
-        "address_cep": request.address_cep,
-        "occupation": request.occupation
-        },synchronize_session=False)
+        address_data.update({
+        "street": request.street,
+        "district": request.district,
+        "city_id": request.city_id,
+        "country": request.country,
+        "last_update": request.last_update
+        },synchronize_session=False
+    )
 
     try:
         db.commit()
         return {"msg": f"id {id} data was updated in the database - status: {200}"}
     except Exception as e:
         return {"msg": f"Something goes wrong - Exception: {e}"}
+
+
+@app.get("/users", tags = ["User"])
+def get_all_user(response: Response, db: Session=Depends(get_db)):
+    user_data = db.query(models.User).all()
+    if not user_data:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"msg": f"No user was found in the database - status: {response.status_code}"}
+    return user_data
 
 
 @app.get("/user/{id}", response_model = schemas.User_View, status_code = status.HTTP_200_OK, tags = ["User"])
@@ -128,7 +146,7 @@ def get_user_data(id,db: Session=Depends(get_db)):
     return user_data
 
 
-@app.post("/user", response_model = schemas.User_View, status_code = status.HTTP_200_OK, tags = ["User"])
+@app.post("/user", status_code = status.HTTP_200_OK, tags = ["User"])
 def create_user(request: schemas.User, db: Session=Depends(get_db)):
     hashed_password = hashing.Hash.bcrypt(request.password)
     new_user = models.User(
