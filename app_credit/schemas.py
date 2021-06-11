@@ -1,48 +1,72 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Dict
 
 
-class Address(BaseModel):
-    postal_code: int
-    street: str
-    district: str
-    city_id: str
-    country: str
-    last_update: str
-
-class Person(BaseModel):
+class Personal_Info(BaseModel):
     cpf: int
     name: str
     surname: str
-    age: str
+    age: int
     creditcard_id: int
     phone: int
-
-    postal_code: int
-    street: str
-    district: str
-    city_id: str
-    country: str
-    last_update: str
-
-    # debt_list: Optional[float] = None
-
-    person_id: int
-    # address_info = Address
-
-
-class Person_View(BaseModel):
-    cpf: int
-    name: str
-    surname: str
-    age: str
-    creditcard_id: int
-    phone: int
-
-    address_info: Address
 
     class Config:
         orm_mode = True
+
+
+class Address_Info(BaseModel):
+    postal_code: int
+    number: int
+    street: str
+    district: str
+    city_id: str
+    country: str
+    last_update: str
+
+    class Config:
+        orm_mode = True
+
+
+class Debt_Info(BaseModel):
+    creditor: Optional[str]
+    debt_amount: Optional[float]
+    interest_rate: Optional[float]
+
+    class Config:
+        orm_mode = True
+
+
+class Person_In(BaseModel):
+    personal_info: Personal_Info
+    address_info: Address_Info
+    debt_info: Debt_Info
+
+    
+class Person_View(BaseModel):
+    personal_info: Personal_Info
+    address_info: Address_Info
+    debt_info: Debt_Info
+
+    class Config:
+        orm_mode = True
+
+
+class Person_Update(BaseModel):
+    cpf: Optional[int]
+    name: Optional[str]
+    surname: Optional[str]
+    age: Optional[int]
+    creditcard_id: Optional[int]
+    phone: Optional[int]
+    postal_code: Optional[int]
+    street: Optional[str]
+    district: Optional[str]
+    city_id: Optional[str]
+    country: Optional[str]
+    last_update: Optional[str]
+    creditor: Optional[str]
+    debt_amount: Optional[float]
+    interest_rate: Optional[float]
 
 
 class User(BaseModel):

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, status, Response, HTTPException
+from fastapi import FastAPI, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 from app_credit import schemas, models, database, hashing
@@ -23,67 +23,99 @@ def get_db():
         db.close()
 
 
-@app.get("/person", tags = ["Person"])
-def get_all_data(response: Response, db: Session=Depends(get_db)):
-    Personal_Data = db.query(models.Personal_Data).all()
-    # Address_Data = db.query(models.Address_Data).all()
-    if not Personal_Data:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": f"The database is empty - status: {response.status_code}"}
-    return Personal_Data#, Address_Data
+@app.get("/allpersons", tags = ["Person"])
+def get_all_data(db: Session=Depends(get_db)):
+    personal_data = db.query(models.Personal_Data).all()
+    address_data = db.query(models.Address_Data).all()
+    debt_data = db.query(models.Debt_Data).all()
+
+    if not personal_data:
+        raise HTTPException(status_code=404, detail= (
+            f"msg: The database is empty - status: {status.HTTP_404_NOT_FOUND}")
+            )
+    return personal_data, address_data, debt_data
+
+
+@app.get("/cpfid/{cpf}", status_code = status.HTTP_200_OK, tags = ["Person"])
+def get_cpf_data(cpf, db: Session=Depends(get_db)):
+    personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).first()
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.person_id == cpf).first()
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.person_id == cpf).first()
+    if not personal_data:
+        raise HTTPException(status_code=404, detail= (
+            f"msg: The person with the cpf {cpf} not exists in the database - status: {status.HTTP_404_NOT_FOUND}"))
+
+    return personal_data, address_data, debt_data
 
 
 @app.get("/person/{id}", response_model = schemas.Person_View, status_code = status.HTTP_200_OK, tags = ["Person"])
-def get_person_data(id, response: Response, db: Session=Depends(get_db)):
-    Personal_Data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).first()
-    # Address_Data = db.query(models.Address_Data).filter(models.Address_Data.id == id).first()
-    if not Personal_Data:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": f"The person with the id {id} not exists in the database - status: {response.status_code}"}
-    
-    return Personal_Data#, Address_Data 
+def get_person_data(id, db: Session=Depends(get_db)):
+    personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).first()
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id).first()
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.id == id).first()
+    if not personal_data:
+        raise HTTPException(status_code=404, detail= (
+            f"msg: The person with the id {id} not exists in the database - status: {status.HTTP_404_NOT_FOUND}"))
+
+    return schemas.Person_View(personal_info = personal_data, address_info = address_data, debt_info = debt_data)
+
+
+@app.get("/cpfdata/{cpf}", response_model = schemas.Person_View, status_code = status.HTTP_200_OK, tags = ["Person"])
+def get_cpf_data(cpf, db: Session=Depends(get_db)):
+    personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).first()
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.person_id == cpf).first()
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.person_id == cpf).first()
+    if not personal_data:
+        raise HTTPException(status_code=404, detail= (
+            f"msg: The person with the id {cpf} not exists in the database - status: {status.HTTP_404_NOT_FOUND}"))
+
+    return schemas.Person_View(personal_info = personal_data, address_info = address_data, debt_info = debt_data)
 
 
 @app.post("/person", status_code = status.HTTP_200_OK, tags = ["Person"])
-def create_person_data(request: schemas.Person, db: Session=Depends(get_db)):
+def create_person_data(request: schemas.Person_In, db: Session=Depends(get_db)):
     personal_data = models.Personal_Data(
-        cpf = request.cpf,
-        name = request.name,
-        surname = request.name,
-        age = request.age,
-        creditcard_id = request.creditcard_id,
-        phone = request.phone,
-        person_id = 1                            #atrelar ao cpf
-    )
+        cpf = request.personal_info.cpf,
+        name = request.personal_info.name,
+        surname = request.personal_info.name,
+        age = request.personal_info.age,
+        creditcard_id = request.personal_info.creditcard_id,
+        phone = request.personal_info.phone,)
+
     address_data = models.Address_Data(
-        postal_code = request.postal_code,
-        street = request.street,
-        district = request.district,
-        city_id = request.city_id,
-        country = request.country,
-        last_update = request.last_update
-    )
+        postal_code = request.address_info.postal_code,
+        number = request.address_info.number,
+        street = request.address_info.street,
+        district = request.address_info.district,
+        city_id = request.address_info.city_id,
+        country = request.address_info.country,
+        last_update = request.address_info.last_update,
+        person_id = request.personal_info.cpf,)
+        
+    debt_data = models.Debt_Data(
+        creditor = request.debt_info.creditor,
+        debt_amount = request.debt_info.debt_amount,
+        interest_rate = request.debt_info.interest_rate,
+        person_id = request.personal_info.cpf,)
     try:
         db.add(personal_data)
-        db.commit()
-        db.refresh(personal_data)
         db.add(address_data)
+        db.add(debt_data)
         db.commit()
-        db.refresh(address_data)
-        return {"msg": f"The person of cpf {request.cpf} was registered in the database - status: {status.HTTP_201_CREATED}"}
+        return {"msg": f"The person with the cpf {request.personal_info.cpf} was registered in the database - status: {status.HTTP_201_CREATED}"}
     except Exception as e:
         return {"msg": f"Something goes wrong - Exception: {e}"}
 
     
 @app.delete("/person/{id}", tags = ["Person"])
-def destroy_person_data(id, response: Response, db: Session=Depends(get_db)):
+def destroy_person_data(id, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).delete(synchronize_session=False)
     address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id).delete(synchronize_session=False)
-
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.id == id).delete(synchronize_session=False)
     if not personal_data:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": f"id {id} does not exist in database - status: - status: {response.status_code}"}
-
+        raise HTTPException(status_code=404, detail= (
+            f"msg: id {id} does not exist in database - status: - status: {status.HTTP_404_NOT_FOUND}")
+            )
     try:
         db.commit()
         return {"msg": f"id {id} data was deleted from the database - status: {200}"}
@@ -91,14 +123,32 @@ def destroy_person_data(id, response: Response, db: Session=Depends(get_db)):
         return {"msg": f"Something goes wrong - Exception: {e}"}
 
 
+@app.delete("/cpfdata/{cpf}", tags = ["Person"])
+def destroy_cpf_data(cpf, db: Session=Depends(get_db)):
+    personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).delete(synchronize_session=False)
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.person_id == cpf).delete(synchronize_session=False)
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.person_id == cpf).delete(synchronize_session=False)
+    if not personal_data:
+        raise HTTPException(status_code=404, detail= (
+            f"msg: cpf {cpf} does not exist in database - status: - status: {status.HTTP_404_NOT_FOUND}")
+            )
+    try:
+        db.commit()
+        return {"msg": f"cpf {cpf} data was deleted from the database - status: {200}"}
+    except Exception as e:
+        return {"msg": f"Something goes wrong - Exception: {e}"}
+
+
 @app.put("/person/{id}", status_code=status.HTTP_202_ACCEPTED, tags = ["Person"])
-def update_person_data(id, response: Response, request: schemas.Person, db: Session=Depends(get_db)):
+def update_person_data(id, request: schemas.Person_Update, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id)
     address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id)
-    
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.id == id)
+
     if not personal_data.first():
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": f"id {id} does not exist in database - status: - status: {response.status_code}"}
+        raise HTTPException(status_code=404, detail= (
+            f"msg: id {id} does not exist in database - status: - status: {status.HTTP_404_NOT_FOUND}")
+            )
     else:
         personal_data.update({
         "cpf": request.cpf,
@@ -107,16 +157,21 @@ def update_person_data(id, response: Response, request: schemas.Person, db: Sess
         "age": request.age,
         "creditcard_id": request.creditcard_id,
         "phone": request.phone
-        },synchronize_session=False
-    )
+        },synchronize_session=False)
+
         address_data.update({
         "street": request.street,
         "district": request.district,
         "city_id": request.city_id,
         "country": request.country,
         "last_update": request.last_update
-        },synchronize_session=False
-    )
+        },synchronize_session=False)
+
+        debt_data.update({
+        "creditor": request.creditor,
+        "debt_amount": request.debt_amount,
+        "interest_rate": request.interest_rate,
+        },synchronize_session=False)
 
     try:
         db.commit()
@@ -126,11 +181,12 @@ def update_person_data(id, response: Response, request: schemas.Person, db: Sess
 
 
 @app.get("/users", tags = ["User"])
-def get_all_user(response: Response, db: Session=Depends(get_db)):
+def get_all_user(db: Session=Depends(get_db)):
     user_data = db.query(models.User).all()
     if not user_data:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": f"No user was found in the database - status: {response.status_code}"}
+        raise HTTPException(status_code=404, detail= (
+            f"msg: No user was found in the database - status: {status.HTTP_404_NOT_FOUND}")
+            )
     return user_data
 
 
@@ -173,7 +229,6 @@ def destroy_user_data(id, db: Session=Depends(get_db)):
         raise HTTPException(status_code=404, detail= (
             f"msg: id {id} does not exist in database - status: - status: {status.HTTP_404_NOT_FOUND}")
             )
-
     try:
         db.commit()
         return {"msg": f"id {id} data was deleted from the database - status: {200}"}
