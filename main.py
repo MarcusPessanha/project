@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 from app_credit import schemas, models, database, hashing
+from app_credit.support import Support
 
 
 app = FastAPI()
@@ -91,7 +92,7 @@ def create_person_data(request: schemas.Person_In, db: Session=Depends(get_db)):
         district = request.address_info.district,
         city_id = request.address_info.city_id,
         country = request.address_info.country,
-        last_update = request.address_info.last_update,
+        last_update = Support.get_date(),
         ##to do - Corrigir o relationship entre as tabelas do bd_1
         cpf = request.personal_info.cpf,
         )
@@ -190,7 +191,7 @@ def update_person_data(id, request: schemas.Person_Update, db: Session=Depends(g
         "district": request.district,
         "city_id": request.city_id,
         "country": request.country,
-        "last_update": request.last_update
+        "last_update": Support.get_date()
         },synchronize_session=False
         )
 

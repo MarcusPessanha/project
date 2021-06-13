@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, List, Dict
+from datetime import date
 
 
 class Personal_Info(BaseModel):
@@ -21,7 +22,6 @@ class Address_Info(BaseModel):
     district: str
     city_id: str
     country: str
-    last_update: str
 
     class Config:
         orm_mode = True
@@ -48,10 +48,23 @@ class Debt_In(BaseModel):
     debt_amount: float
     interest_rate: float
 
-    
+
+class Address_View(BaseModel):
+    postal_code: int
+    number: int
+    street: str
+    district: str
+    city_id: str
+    country: str
+    last_update: date
+
+    class Config:
+        orm_mode = True
+        
+
 class Person_View(BaseModel):
     personal_info: Personal_Info
-    address_info: Address_Info
+    address_info: Address_View
     debt_info: List[Debt_Info]
 
     class Config:
@@ -69,13 +82,12 @@ class Person_Update(BaseModel):
     district: str
     city_id: str
     country: str
-    last_update: str
+
 
 class Debt_Update(BaseModel):
     creditor: Optional[str]
     debt_amount: Optional[float]
     interest_rate: Optional[float]
-    last_update: Optional[str]
 
 
 class User(BaseModel):
