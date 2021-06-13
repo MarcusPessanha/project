@@ -59,18 +59,17 @@ class Person_View(BaseModel):
 
 
 class Person_Update(BaseModel):
-    name: Optional[str]
-    surname: Optional[str]
-    age: Optional[int]
-    creditcard_id: Optional[int]
-    phone: Optional[int]
-    postal_code: Optional[int]
-    street: Optional[str]
-    district: Optional[str]
-    city_id: Optional[str]
-    country: Optional[str]
-    last_update: Optional[str]
-
+    name: str
+    surname: str
+    age: int
+    creditcard_id: int
+    phone: int
+    postal_code: int
+    street: str
+    district: str
+    city_id: str
+    country: str
+    last_update: str
 
 class Debt_Update(BaseModel):
     creditor: Optional[str]

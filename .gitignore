@@ -132,3 +132,7 @@ dmypy.json
 .pyre/
 
 data/
+app_credit/__pycache__
+app_credit/__pycache__/
+TEMPORARIO.py
+.mypy_cache

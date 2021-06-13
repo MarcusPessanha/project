@@ -49,7 +49,7 @@ def get_cpf_id(cpf, db: Session=Depends(get_db)):
 def get_person_data(id, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).first()
     address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id).first()
-    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.person_id == personal_data.cpf).all()
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.cpf == personal_data.cpf).all()
     if not personal_data:
         raise HTTPException(status_code=404, detail= (
             f"msg: The person with the id {id} not exists in the database - status: {status.HTTP_404_NOT_FOUND}"))
@@ -60,14 +60,13 @@ def get_person_data(id, db: Session=Depends(get_db)):
 @app.get("/cpfdata/{cpf}", response_model = schemas.Person_View, status_code = status.HTTP_200_OK, tags = ["Person_CPF"])
 def get_cpf_data(cpf, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).first()
-    address_data = db.query(models.Address_Data).filter(models.Address_Data.person_id == cpf).first()
-    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.person_id == cpf).all()
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.cpf == cpf).first()
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.cpf == cpf).all()
     if not personal_data:
         raise HTTPException(status_code=404, detail= (
             f"msg: The person with the id {cpf} not exists in the database - status: {status.HTTP_404_NOT_FOUND}"))
     else:
         return schemas.Person_View(personal_info = personal_data, address_info = address_data, debt_info = debt_data)
-        # return personal_data, address_data, debt_data
 
 
 @app.post("/person", status_code = status.HTTP_200_OK, tags = ["Person"])
@@ -93,13 +92,17 @@ def create_person_data(request: schemas.Person_In, db: Session=Depends(get_db)):
         city_id = request.address_info.city_id,
         country = request.address_info.country,
         last_update = request.address_info.last_update,
-        person_id = request.personal_info.cpf,)
+        ##to do - Corrigir o relationship entre as tabelas do bd_1
+        cpf = request.personal_info.cpf,
+        )
         
     debt_data = models.Debt_Data(
         creditor = request.debt_info.creditor,
         debt_amount = request.debt_info.debt_amount,
         interest_rate = request.debt_info.interest_rate,
-        person_id = request.personal_info.cpf,)
+        ##to do - Corrigir o relationship entre as tabelas do bd_1
+        cpf = request.personal_info.cpf,
+        )
     try:
         db.add(personal_data)
         db.add(address_data)
@@ -121,7 +124,7 @@ def create_debt_cpf(request: schemas.Debt_In, db: Session=Depends(get_db)):
         creditor = request.creditor,
         debt_amount = request.debt_amount,
         interest_rate = request.interest_rate,
-        person_id = request.cpf)
+        cpf = request.cpf)
     try:
         db.add(debt_data)
         db.commit()
@@ -139,7 +142,7 @@ def destroy_person_data(id, db: Session=Depends(get_db)):
 
     delete_person_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).delete(synchronize_session=False)
     address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id).delete(synchronize_session=False)
-    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.person_id == personal_data.cpf).delete(synchronize_session=False)
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.cpf == personal_data.cpf).delete(synchronize_session=False)
 
     try:
         db.commit()
@@ -151,8 +154,8 @@ def destroy_person_data(id, db: Session=Depends(get_db)):
 @app.delete("/cpfdata/{cpf}", tags = ["Person_CPF"])
 def destroy_cpf_data(cpf, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).delete(synchronize_session=False)
-    address_data = db.query(models.Address_Data).filter(models.Address_Data.person_id == cpf).delete(synchronize_session=False)
-    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.person_id == cpf).delete(synchronize_session=False)
+    address_data = db.query(models.Address_Data).filter(models.Address_Data.cpf == cpf).delete(synchronize_session=False)
+    debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.cpf == cpf).delete(synchronize_session=False)
     if not personal_data:
         raise HTTPException(status_code=404, detail= (
             f"msg: cpf {cpf} does not exist in database - status: - status: {status.HTTP_404_NOT_FOUND}"))
@@ -179,7 +182,8 @@ def update_person_data(id, request: schemas.Person_Update, db: Session=Depends(g
         "age": request.age,
         "creditcard_id": request.creditcard_id,
         "phone": request.phone
-        },synchronize_session=False)
+        },synchronize_session=False
+        )
 
         address_data.update({
         "street": request.street,
@@ -187,13 +191,8 @@ def update_person_data(id, request: schemas.Person_Update, db: Session=Depends(g
         "city_id": request.city_id,
         "country": request.country,
         "last_update": request.last_update
-        },synchronize_session=False)
-
-        debt_data.update({
-        "creditor": request.creditor,
-        "debt_amount": request.debt_amount,
-        "interest_rate": request.interest_rate,
-        },synchronize_session=False)
+        },synchronize_session=False
+        )
 
     try:
         db.commit()
