@@ -15,8 +15,8 @@ class Personal_Data(Base):
     phone = Column(Integer)
 
     # person_id = Column(Integer, ForeignKey('ADDRESS_DATA.id'))
-    address_info = relationship("Address_Data", back_populates="person_address")
-    debt_info = relationship("Debt_Data", back_populates="person_debts")
+    address_info = relationship("Address_Data", back_populates="person_address", cascade="all, delete, delete-orphan" )
+    debt_info = relationship("Debt_Data", back_populates="person_debts", cascade="all, delete, delete-orphan")
 
 
 class Address_Data(Base):
@@ -32,7 +32,7 @@ class Address_Data(Base):
     last_update = Column(String(100))
 
     person_id = Column(Integer, ForeignKey('PERSONAL_DATA.id'))
-    person_address = relationship("Personal_Data", back_populates="address_info")
+    person_address = relationship("Personal_Data", back_populates="address_info", passive_deletes='all')
 
 
 class Debt_Data(Base):
@@ -44,7 +44,7 @@ class Debt_Data(Base):
     interest_rate = Column(Float)
 
     person_id = Column(Integer, ForeignKey('PERSONAL_DATA.id'))
-    person_debts = relationship("Personal_Data", back_populates="debt_info")
+    person_debts = relationship("Personal_Data", back_populates="debt_info", passive_deletes='all')
 
 
 class User(Base):

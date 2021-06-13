@@ -39,20 +39,26 @@ class Debt_Info(BaseModel):
 class Person_In(BaseModel):
     personal_info: Personal_Info
     address_info: Address_Info
-    debt_info: Debt_Info
+    debt_info: Optional[Debt_Info]
+
+
+class Debt_In(BaseModel):
+    cpf: int
+    creditor: str
+    debt_amount: float
+    interest_rate: float
 
     
 class Person_View(BaseModel):
     personal_info: Personal_Info
     address_info: Address_Info
-    debt_info: Debt_Info
+    debt_info: List[Debt_Info]
 
     class Config:
         orm_mode = True
 
 
 class Person_Update(BaseModel):
-    cpf: Optional[int]
     name: Optional[str]
     surname: Optional[str]
     age: Optional[int]
@@ -64,9 +70,13 @@ class Person_Update(BaseModel):
     city_id: Optional[str]
     country: Optional[str]
     last_update: Optional[str]
+
+
+class Debt_Update(BaseModel):
     creditor: Optional[str]
     debt_amount: Optional[float]
     interest_rate: Optional[float]
+    last_update: Optional[str]
 
 
 class User(BaseModel):
