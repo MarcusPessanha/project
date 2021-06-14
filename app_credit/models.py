@@ -1,6 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, BigInteger, String, Float, Table, Column, Date
+from sqlalchemy import Column, ForeignKey, Integer, BigInteger, String, Float, Column, Date
 from sqlalchemy.orm import relationship
-
 from .database import Base
 
 class Personal_Data(Base):
@@ -15,7 +14,7 @@ class Personal_Data(Base):
     phone = Column(BigInteger)
     # last_update = Column(Date, nullable = False)
 
-    ##to do - Corrigir o relationship entre as tabelas do bd_1 
+    # ToDo: Corrigir o relationship entre as tabelas do bd_1 
     # address_info = relationship("Address_Data", back_populates="person_address", cascade="all, delete" )
     # debt_info = relationship("Debt_Data", back_populates="person_debts", cascade="all, delete")
 
@@ -33,7 +32,7 @@ class Address_Data(Base):
     last_update = Column(Date, nullable = False)
 
     cpf = Column(BigInteger, unique=True, nullable = False)
-    ##to do - Corrigir o relationship entre as tabelas do bd_1 
+    # ToDo: Corrigir o relationship entre as tabelas do bd_1 
     # person_id = Column(BigInteger, ForeignKey('PERSONAL_DATA.id'))
     # person_address = relationship("Personal_Data", back_populates="address_info", passive_deletes='all')
 
@@ -48,7 +47,7 @@ class Debt_Data(Base):
     # last_update = Column(Date, nullable = False)
 
     cpf = Column(BigInteger, nullable = False)
-    ##to do - Corrigir o relationship entre as tabelas do bd_1
+    # ToDo: Corrigir o relationship entre as tabelas do bd_1 
     # person_id = Column(BigInteger, ForeignKey('PERSONAL_DATA.id'))
     # person_debts = relationship("Personal_Data", back_populates="debt_info", passive_deletes='all')
 
