@@ -20,7 +20,7 @@ def get_all_data(db: Session=Depends(get_db)):
 
 
 @router.get("/cpfid/{cpf}", status_code = status.HTTP_200_OK, tags = ["Person_CPF"])
-def get_cpf_id(cpf, db: Session=Depends(get_db)):
+def get_cpf_id(cpf: int, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).first()
     if not personal_data:
         raise HTTPException(status_code=404, detail= (
@@ -30,7 +30,7 @@ def get_cpf_id(cpf, db: Session=Depends(get_db)):
 
 
 @router.get("/person/{id}", response_model = schemas.Person_View, status_code = status.HTTP_200_OK, tags = ["Person_id"])
-def get_person_data(id, db: Session=Depends(get_db)):
+def get_person_data(id: int, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).first()
     address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id).first()
     debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.cpf == personal_data.cpf).all()
@@ -42,7 +42,7 @@ def get_person_data(id, db: Session=Depends(get_db)):
 
 
 @router.get("/cpfdata/{cpf}", response_model = schemas.Person_View, status_code = status.HTTP_200_OK, tags = ["Person_CPF"])
-def get_cpf_data(cpf, db: Session=Depends(get_db)):
+def get_cpf_data(cpf: int, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).first()
     address_data = db.query(models.Address_Data).filter(models.Address_Data.cpf == cpf).first()
     debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.cpf == cpf).all()
@@ -118,7 +118,7 @@ def create_debt_cpf(request: schemas.Debt_In, db: Session=Depends(get_db)):
 
 
 @router.delete("/person/{id}", tags = ["Person_id"])
-def destroy_person_data(id, db: Session=Depends(get_db)):
+def destroy_person_data(id: int, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id).first()
     if not personal_data:
         raise HTTPException(status_code=404, detail= (
@@ -136,7 +136,7 @@ def destroy_person_data(id, db: Session=Depends(get_db)):
 
     
 @router.delete("/cpfdata/{cpf}", tags = ["Person_CPF"])
-def destroy_cpf_data(cpf, db: Session=Depends(get_db)):
+def destroy_cpf_data(cpf: int, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.cpf == cpf).delete(synchronize_session=False)
     address_data = db.query(models.Address_Data).filter(models.Address_Data.cpf == cpf).delete(synchronize_session=False)
     debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.cpf == cpf).delete(synchronize_session=False)
@@ -151,7 +151,7 @@ def destroy_cpf_data(cpf, db: Session=Depends(get_db)):
 
 
 @router.put("/person/{id}", status_code=status.HTTP_202_ACCEPTED, tags = ["Person_id"])
-def update_person_data(id, request: schemas.Person_Update, db: Session=Depends(get_db)):
+def update_person_data(id: int, request: schemas.Person_Update, db: Session=Depends(get_db)):
     personal_data = db.query(models.Personal_Data).filter(models.Personal_Data.id == id)
     address_data = db.query(models.Address_Data).filter(models.Address_Data.id == id)
     debt_data = db.query(models.Debt_Data).filter(models.Debt_Data.id == id)

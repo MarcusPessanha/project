@@ -17,7 +17,7 @@ def get_all_user(db: Session=Depends(get_db)):
 
 
 @router.get("/user/{id}", response_model = schemas.User_View, status_code = status.HTTP_200_OK, tags = ["User"])
-def get_user_data(id,db: Session=Depends(get_db)):
+def get_user_data(id: int,db: Session=Depends(get_db)):
     user_data = db.query(models.User).filter(models.User.id == id).first()
 
     if not user_data:
@@ -46,7 +46,7 @@ def create_user(request: schemas.User, db: Session=Depends(get_db)):
 
 
 @router.delete("/user/{id}", tags = ["User"])
-def destroy_user_data(id, db: Session=Depends(get_db)):
+def destroy_user_data(id: int, db: Session=Depends(get_db)):
     user_data = db.query(models.User).filter(models.User.id == id).delete(synchronize_session=False)
 
     if not user_data:

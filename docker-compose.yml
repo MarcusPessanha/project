@@ -9,4 +9,11 @@ services:
           - POSTGRES_PASSWORD=postgrespassword
         ports:
          - "5432:5432"
+    redis:
+        image: redis
+        command: redis-server --requirepass redispass
+        volumes:
+          - /docker/host/dir:/data
+        ports:
+         - "6379:6379"
     
