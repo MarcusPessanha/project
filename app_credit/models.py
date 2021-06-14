@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, BigInteger, String, Float, Column, Date
 from sqlalchemy.orm import relationship
-from .database import Base
+from .postgre_dbconfig import Base
 
 class Personal_Data(Base):
     __tablename__ = "PERSONAL_DATA"

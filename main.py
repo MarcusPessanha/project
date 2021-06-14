@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, status, HTTPException
 from app_credit import models
-from app_credit.database import engine, get_db
+from app_credit.postgre_dbconfig import engine, get_db
 from app_credit.routers import person, user
-from app_credit.databases.redis import redis_routers
+from app_credit.db_others.redis import redis_routers
 
 app = FastAPI()
 models.Base.metadata.create_all(engine)

@@ -28,7 +28,7 @@ def last_query(cpf: int):
 
 
 @router.post("/bureau", status_code = status.HTTP_200_OK, tags = ["Bureau_Queryes"])
-def create_bureau(request: Redis_Query):
+def create_bureau_query(request: Redis_Query):
     cpf = request.cpf
     bureau_postal_code = request.bureau_postal_code
     last_query = Support.get_time()
