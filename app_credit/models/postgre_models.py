@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, BigInteger, String, Float, Column, Date
 from sqlalchemy.orm import relationship
-from .postgre_dbconfig import Base
+from ..database_config.postgre_config import Base
 
 class Personal_Data(Base):
     __tablename__ = "PERSONAL_DATA"
@@ -60,9 +60,3 @@ class User(Base):
     email = Column(String(100))
     cpf = Column(BigInteger, unique=True)  
     password = Column(String)
-
-    # patrimony = Column(String(100))
-    # address_cep = Column(Integer)
-    # occupation = Column(String(100))
-
-

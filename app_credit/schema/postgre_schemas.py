@@ -3,18 +3,6 @@ from typing import Optional, List, Dict
 from datetime import date
 
 
-class Personal_Info(BaseModel):
-    cpf: int
-    name: str
-    surname: str
-    age: int
-    creditcard_id: int
-    phone: int
-
-    class Config:
-        orm_mode = True
-
-
 class Address_Info(BaseModel):
     postal_code: int
     number: int
@@ -25,6 +13,18 @@ class Address_Info(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Personal_Info(BaseModel):
+    cpf: int
+    name: str
+    surname: str
+    age: int
+    creditcard_id: int
+    phone: int
+
+    class Config:
+        orm_mode = True       
 
 
 class Debt_Info(BaseModel):
@@ -60,7 +60,7 @@ class Address_View(BaseModel):
 
     class Config:
         orm_mode = True
-        
+
 
 class Person_View(BaseModel):
     personal_info: Personal_Info
@@ -83,7 +83,7 @@ class Person_Update(BaseModel):
     city_id: str
     country: str
 
-
+    
 class Debt_Update(BaseModel):
     creditor: Optional[str]
     debt_amount: Optional[float]

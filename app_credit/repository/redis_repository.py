@@ -1,16 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-
-from .redis_config import Redis_Cache, redis
-from .redis_schemas import Redis_Query, Redis_Purchase
-from ... support import Support
-
-router = APIRouter()
+from fastapi import status
+from ..database_config.redis_config import redis
+from ..extra.support import Support
 
 
-# ToDo: Melhorar mensagens de erro.  
 
-@router.get("/allkeys", status_code = status.HTTP_200_OK, tags = ["Bureau_Queryes"])
-def all_keys_data():
+def get_all_keys():
     try:
         response = redis.keys()        
         return response
@@ -18,8 +12,7 @@ def all_keys_data():
         return {"msg": f"Something goes wrong - Exception: {e}"}
 
 
-@router.get("/bureau/{cpf}", status_code = status.HTTP_200_OK, tags = ["Bureau_Queryes"])
-def last_query(cpf: int):
+def get_last_query(cpf):
     try:
         last_query = redis.get(key= f'{cpf}_query', serialization=True)        
         return last_query
@@ -27,24 +20,19 @@ def last_query(cpf: int):
         return {"msg": f"Something goes wrong - Exception: {e}"}
 
 
-@router.post("/bureau", status_code = status.HTTP_200_OK, tags = ["Bureau_Queryes"])
-def create_bureau_query(request: Redis_Query):
+def post_bureau_query(request):
     cpf = request.cpf
     bureau_postal_code = request.bureau_postal_code
     last_query = Support.get_time()
-
     value = {'cpf': cpf, 'bureau_postal_code': bureau_postal_code, 'datetime': last_query}
-
     try:
         redis.set(key= f'{cpf}_query', value= value, serialization=True)
-        
         return {"msg": f"successfully registered - status: {status.HTTP_201_CREATED}"}
     except Exception as e:
         return {"msg": f"Something goes wrong - Exception: {e}"}
 
 
-@router.get("/purchase/{cpf}", status_code = status.HTTP_200_OK, tags = ["Purchases"])
-def last_purchase(cpf: int):
+def get_last_purchase(cpf):
     try:
         response = redis.get(key= f'{cpf}_purchase', serialization=True)        
         return response
@@ -52,8 +40,7 @@ def last_purchase(cpf: int):
         return {"msg": f"Something goes wrong - Exception: {e}"}
 
 
-@router.post("/purchase", status_code = status.HTTP_200_OK, tags = ["Purchases"])
-def create_purchase(request: Redis_Purchase):
+def post_purchase(request):
     cpf = request.cpf
     creditcard_id = request.creditcard_id
     store = request.store
@@ -72,7 +59,6 @@ def create_purchase(request: Redis_Purchase):
 
     try:
         redis.set(key= f'{cpf}_purchase', value= value, serialization=True)
-        
         return {"msg": f"successfully registered - status: {status.HTTP_201_CREATED}"}
     except Exception as e:
         return {"msg": f"Something goes wrong - Exception: {e}"}

@@ -8,12 +8,19 @@ services:
           - POSTGRES_DB=name
           - POSTGRES_PASSWORD=postgrespassword
         ports:
-         - "5432:5432"
+          - "5432:5432"
     redis:
         image: redis
         command: redis-server --requirepass redispass
         volumes:
           - /docker/host/dir:/data
         ports:
-         - "6379:6379"
+          - "6379:6379"
+    dynamodb-local:
+        command: "-jar DynamoDBLocal.jar -sharedDb -optimizeDbBeforeStartup -dbPath ./data -port 6000"
+        image: "amazon/dynamodb-local:latest"
+        container_name: dynamodb-local
+        volumes:
+          - "./docker/dynamodb:/home/dynamodblocal/data"
+        working_dir: /home/dynamodblocal
     

@@ -1,13 +1,11 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-from .. import models, schemas, hashing
-from ..postgre_dbconfig import get_db
+from fastapi import status, HTTPException
+from ..models import postgre_models as models
+from ..database_config.postgre_config import get_db
+from ..extra.hashing import Hash
+from ..extra.support import Support
 
 
-router = APIRouter()
-
-@router.get("/users", tags = ["User"])
-def get_all_user(db: Session=Depends(get_db)):
+def get_all_data(db):
     user_data = db.query(models.User).all()
     if not user_data:
         raise HTTPException(status_code=404, detail= (
@@ -16,8 +14,7 @@ def get_all_user(db: Session=Depends(get_db)):
         return user_data
 
 
-@router.get("/user/{id}", response_model = schemas.User_View, status_code = status.HTTP_200_OK, tags = ["User"])
-def get_user_data(id: int,db: Session=Depends(get_db)):
+def get_user_data(id, db):
     user_data = db.query(models.User).filter(models.User.id == id).first()
 
     if not user_data:
@@ -27,9 +24,8 @@ def get_user_data(id: int,db: Session=Depends(get_db)):
         return user_data
 
 
-@router.post("/user", status_code = status.HTTP_200_OK, tags = ["User"])
-def create_user(request: schemas.User, db: Session=Depends(get_db)):
-    hashed_password = hashing.Hash.bcrypt(request.password)
+def post_user(request, db):
+    hashed_password = Hash.bcrypt(request.password)
     new_user = models.User(
         login = request.login,
         email = request.email,
@@ -45,8 +41,7 @@ def create_user(request: schemas.User, db: Session=Depends(get_db)):
         return {"msg": f"Something goes wrong - Exception: {e}"}
 
 
-@router.delete("/user/{id}", tags = ["User"])
-def destroy_user_data(id: int, db: Session=Depends(get_db)):
+def delete_user(id, db):
     user_data = db.query(models.User).filter(models.User.id == id).delete(synchronize_session=False)
 
     if not user_data:

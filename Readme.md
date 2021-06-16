@@ -4,10 +4,16 @@
  - create your virtualenv
  - pip3 install -r requirements.txt
 
+### Install the AWS SAM CLI to use Dynamodb
+  - Step 4 in: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-windows.html
+  - Go to AWS "MyAccount -> security credentials" and generate your aws access key id and aws secret access key
+  - Use the command- aws configure -to configure your credentials
+  - You can also configure your credentials byr modifying this file C:\Users\<user>\.aws
+
 ## Docker compose:
  - docker-compose up
 
-## Server start:
+## Start server:
 - uvicorn main:app
 
 ## Swagger Interface Description:

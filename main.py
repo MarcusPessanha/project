@@ -1,8 +1,7 @@
-from fastapi import FastAPI, Depends, status, HTTPException
-from app_credit import models
-from app_credit.postgre_dbconfig import engine, get_db
-from app_credit.routers import person, user
-from app_credit.db_others.redis import redis_routers
+from fastapi import FastAPI, Depends, status
+from app_credit.models import postgre_models as models
+from app_credit.database_config.postgre_config import engine, get_db
+from app_credit.routers import redis_routers, dynamodb_routers, postgre_routers
 
 app = FastAPI()
 models.Base.metadata.create_all(engine)
@@ -16,6 +15,6 @@ def health(session: bool = Depends(get_db)):
         return 'Message to help with error' 
 
 
-app.include_router(person.router)
-app.include_router(user.router)
+app.include_router(postgre_routers.router)
 app.include_router(redis_routers.router)
+app.include_router(dynamodb_routers.router)
