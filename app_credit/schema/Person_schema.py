@@ -1,7 +1,5 @@
 from typing import Optional, List
-
 from pydantic import BaseModel
-
 from app_credit.schema.Address_schema import Address_Info, Address_View
 from app_credit.schema.Personal_schema import Personal_Info
 from app_credit.schema.Debt_schema import Debt_Info

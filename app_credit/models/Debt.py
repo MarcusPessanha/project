@@ -1,5 +1,4 @@
 from sqlalchemy import Column, BigInteger, String, Float
-
 from app_credit.database_config.postgre_config import Base
 
 

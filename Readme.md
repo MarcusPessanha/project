@@ -31,7 +31,8 @@
 
 
 # Sobre o Projeto:
-
+  API utilizando Python 3.8.7 com fastAPI framework. Escolhi o fastAPI por ser um framework moderno que 
+eu tinha interesse em aprender.
 ## Armazenazenamento:
   Todos os bancos foram implementados em containers Docker usando o Docker Compose.
 ### BASE A 

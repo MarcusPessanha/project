@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status
 from ..schema.redis_schemas import Redis_Query, Redis_Purchase
-
 from ..service import cache_service
 
 router = APIRouter()

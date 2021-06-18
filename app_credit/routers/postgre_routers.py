@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-
 from ..database_config.postgre_config import get_db
 from ..schema.Debt_schema import Debt_In
 from ..schema.Person_schema import Person_Update, Person_In, Person_View
 from ..schema.User_schema import User_Schema, User_View
-
 from ..service.person_service import PersonService
 from ..service.user_service import UserService
 
