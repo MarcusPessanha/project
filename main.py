@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, status
-from app_credit.models import postgre_models as models
+from app_credit.models import User as models
 from app_credit.database_config.postgre_config import engine, get_db
 from app_credit.routers import redis_routers, dynamodb_routers, postgre_routers
 
